@@ -232,4 +232,3 @@ $("#toCurrency").change(convertCurrency);
 $("#updateRates").click(updateRates); 
 }); 
 
-/* Your solution goes here */
