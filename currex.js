@@ -171,7 +171,7 @@ var allCurrencies = {
 "ZWL": "Zimbabwean Dollar" 
 }; 
 
-// Initial data for exchange rates 
+
 var exchangeRates = { 
 "disclaimer": "Usage subject to terms: https://openexchangerates.org/terms", 
 "license": "https://openexchangerates.org/license", 
@@ -186,21 +186,21 @@ var exchangeRates = {
 } 
 }; 
 
-// Perform conversion 
+
 function convertCurrency() { 
 var usDollars = parseFloat($("#usdInput").val()); 
 var selectedOption = $("#toCurrency option:selected").val(); 
 
 $("#resultLabel").text(allCurrencies[selectedOption] + ' (' + selectedOption + '):'); 
 
-// Perform conversion 
+
 var convRate = exchangeRates.rates[selectedOption]; 
 var result = usDollars * convRate; 
 
 $("#resultCurrency").val(result.toFixed(2)); 
 } 
 
-// Update currency dropdown list to only list currency in the exchange rate object 
+ 
 function updateCurrencyDropdown() { 
 var selectHTML = '<option value="" disabled selected>Select currency</option>\n'; 
 
@@ -211,19 +211,30 @@ selectHTML += '<option value="' + currencyAbbrev + '">' + allCurrencies[currency
 $("#toCurrency").html(selectHTML); 
 } 
 
-// Update rates, dropdown list, and conversion 
+
 function updateRates() { 
-var exchangeRatesJSON = $("#exchangeRates").val(); 
+    const proxy = "https://cors-anywhere.herokuapp.com/";
+    var stringRates= "{";
+    
+    const api = `${proxy}https://api.exchangeratesapi.io/latest?base=USD`;
+    var data = $.get(api, function(data){
+        console.log(data);
+        exchangeRates["rates"] = data["rates"];
+        console.log(exchangeRates["rates"]);
+        updateCurrencyDropdown(); 
+        $.each(data["rates"], function(key, value){
+            stringRates += "\""+key +"\":\""+value.toFixed(2)+"\"";
+            
+        });
+       
+        $("#exchangeRates").val("{\"disclaimer\": "+exchangeRates["disclaimer"]+",\"license\": "+exchangeRates["license"]+",\"timestamp\": "+exchangeRates["timestamp"]+",\"base\": "+exchangeRates["base"]+",\"rates\": "+stringRates+"}}");
+    });
+    
+    
 
-// Update exchange rate object 
-exchangeRates = JSON.parse(exchangeRatesJSON); 
 
-// Update currency dropdown 
-updateCurrencyDropdown(); 
-
-// Reset label and value for converted currency 
-$("#resultLabel").text("To Currency ():"); 
-$("#resultCurrency").val("---.--"); 
+    $("#resultLabel").text("To Currency ():"); 
+    $("#resultCurrency").val("---.--"); 
 } 
 
 $(function() { 
